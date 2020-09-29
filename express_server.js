@@ -6,7 +6,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com", 
+  "DZtoes": "http://www.facebook.com", 
 }; 
 const generateRandomString = function () {
   let random = ''; 
@@ -54,6 +55,13 @@ app.post('/urls', (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]; 
   res.redirect(longURL);
+});
+
+// Deletes individual shortURL/longURL pair from urlDatabase, redirects to /urls to show updates. 
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const shortURL = req.params.shortURL; 
+  delete urlDatabase[shortURL]
+  res.redirect(`/urls/`);
 });
 
 // asks the server to listen for requests
