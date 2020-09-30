@@ -27,13 +27,15 @@ const generateRandomString = function () {
 }; 
 
 const checkEmail = function (emailToCheck) {
-  console.log('hello from check email function'); 
+  if (Object.keys(users).length === 0){
+    return false; 
+  }
   for(const user in users) {
-    if(user.email === emailToCheck) {
+    if(users[user].email === emailToCheck) { 
       return true; 
     }
   }
-  return false; 
+    return false; 
 }
 
 
@@ -64,10 +66,10 @@ app.get("/register", (req, res) => {
 // register for app 
 app.post("/register", (req, res) => {
   if(req.body.email === '' || req.body.password === '') {
-    console.log('status code 400, please fill in field'); 
+    res.status('400').json({message: 'Please enter valid email or password'});
     return; 
-  } else if (checkEmail(req.body.email)) {
-    console.log('status code 400, email already exists'); 
+  }  else if (checkEmail(req.body.email)) {
+    res.status('400').json({message: 'Email already exists'});; 
     return; 
   }
   const id = generateRandomString(); 
@@ -78,7 +80,7 @@ app.post("/register", (req, res) => {
   }
   res.cookie('user_id', id);
   users[id] = newUser; 
-  console.log(users);
+  console.log('users object', users); 
   res.redirect(`/urls/`);
 });
 
