@@ -8,13 +8,16 @@ app.set("view engine", "ejs");
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com", 
-  "DZtoes": "http://www.facebook.com", 
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID: "aJ48lW"},
+  "idk768": {longURL: "http://www.google.com", userID: "idk768"}, 
 }; 
 
 const users = {
-
+  'DZtoes': {
+    id: 'DZtoes',
+    email: 'mackenzie.joyal@gmail.com',
+    password: 'SOS',
+  },
 };
 
 const generateRandomString = function () {
@@ -52,6 +55,9 @@ const checkPassword = function (userid, passwordInput) {
 
 //render urls_new.ejs - show a POST form with one input (for the long URL) and button
 app.get("/urls/new", (req, res) => {
+  if(req.cookies['user_id'] === undefined); { 
+    res.redirect("/login"); 
+  }
   const templateVars = {user: users[req.cookies['user_id']]};
   res.render("urls_new", templateVars);
 });
@@ -121,7 +127,8 @@ app.post('/logout', (req, res) => {
 
 // render urls_short - a page with the individual tiny URL id and corresponding long URL, the tiny URL id is a link to the long URL site
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username']}; 
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies['user_id']]}; 
+  console.log(urlDatabase[req.params.shortURL].longURL); 
   res.render('./urls_show', templateVars); 
 });
 
@@ -139,7 +146,7 @@ app.post('/urls', (req, res) => {
 
 // tells the server to redirect to the long URL when routed to /u/:shortURL (link setup in urls_short)
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]; 
+  const longURL = urlDatabase[req.params.shortURL].longURL; 
   res.redirect(longURL);
 });
 
