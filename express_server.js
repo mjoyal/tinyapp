@@ -38,6 +38,13 @@ const checkEmail = function (emailToCheck) {
     return false; 
 }
 
+const checkPassword = function (userid, passwordInput) {
+
+  if(users[userid].password === passwordInput) {
+    return true; 
+  }
+  return false; 
+}; 
 
 // app.get("/urls.json", (req, res) => {
 //   res.json(urlDatabase);
@@ -45,20 +52,17 @@ const checkEmail = function (emailToCheck) {
 
 //render urls_new.ejs - show a POST form with one input (for the long URL) and button
 app.get("/urls/new", (req, res) => {
-  // const templateVars = {username: req.cookies['username']};
   const templateVars = {user: users[req.cookies['user_id']]};
   res.render("urls_new", templateVars);
 });
 
 // render urls_index - show a table of all the long & short URLS
 app.get("/urls", (req, res) => {
-  // const templateVars = { urls: urlDatabase, username: req.cookies['username']};
   const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']]};
   res.render('./urls_index', templateVars); 
 });
 
 app.get("/register", (req, res) => {
-  // const templateVars = {username: req.cookies['username']};
   const templateVars = {user: users[req.cookies['user_id']]};
   res.render('./urls_registration', templateVars); 
 });
@@ -89,19 +93,26 @@ app.get("/login", (req, res) => {
   res.render('./urls_login', templateVars); 
 });
 
-// allows users to logout (clears username cookie)
+// authenticates user 
 app.post('/login', (req, res) => {
   const email = req.body.email; 
-  if(checkEmail(email)) {
-    res.cookie('user_id', checkEmail(email)); 
-    res.redirect(`/urls/`);
+  const password = req.body.password; 
+  const user = checkEmail(email); 
+  if(user) {
+    if(checkPassword(user, password)) {
+      res.cookie('user_id', checkEmail(email)); 
+      res.redirect(`/urls/`);
+    } else {
+      res.status('400').json({message: 'Incorrect password!'})
+    }
   } else {
-    
+    res.status('403').json({message: 'Email cannot be found'});
   }
+  
 }); 
 
-// allows users to setup a username 
-app.post('/urls/logout', (req, res) => {
+// allows users to logout (clears user_id cookie)
+app.post('/logout', (req, res) => {
   res.clearCookie('user_id'); 
   res.redirect(`/urls/`);
 }); 
