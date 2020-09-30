@@ -13,6 +13,10 @@ const urlDatabase = {
   "DZtoes": "http://www.facebook.com", 
 }; 
 
+const users = {
+
+};
+
 const generateRandomString = function () {
   let random = ''; 
   const options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; 
@@ -22,6 +26,16 @@ const generateRandomString = function () {
   return random; 
 }; 
 
+const checkEmail = function (emailToCheck) {
+  console.log('hello from check email function'); 
+  for(const user in users) {
+    if(user.email === emailToCheck) {
+      return true; 
+    }
+  }
+  return false; 
+}
+
 
 // app.get("/urls.json", (req, res) => {
 //   res.json(urlDatabase);
@@ -29,14 +43,43 @@ const generateRandomString = function () {
 
 //render urls_new.ejs - show a POST form with one input (for the long URL) and button
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies['username']};
+  // const templateVars = {username: req.cookies['username']};
+  const templateVars = {user: users[req.cookies['user_id']]};
   res.render("urls_new", templateVars);
 });
 
 // render urls_index - show a table of all the long & short URLS
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies['username']};
+  // const templateVars = { urls: urlDatabase, username: req.cookies['username']};
+  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']]};
   res.render('./urls_index', templateVars); 
+});
+
+app.get("/register", (req, res) => {
+  // const templateVars = {username: req.cookies['username']};
+  const templateVars = {user: users[req.cookies['user_id']]};
+  res.render('./urls_registration', templateVars); 
+});
+
+// register for app 
+app.post("/register", (req, res) => {
+  if(req.body.email === '' || req.body.password === '') {
+    console.log('status code 400, please fill in field'); 
+    return; 
+  } else if (checkEmail(req.body.email)) {
+    console.log('status code 400, email already exists'); 
+    return; 
+  }
+  const id = generateRandomString(); 
+  const newUser = {
+    id, 
+    email: req.body.email, 
+    password: req.body.password,
+  }
+  res.cookie('user_id', id);
+  users[id] = newUser; 
+  console.log(users);
+  res.redirect(`/urls/`);
 });
 
 // allows users to logout (clears username cookie)
@@ -47,7 +90,7 @@ app.post('/urls/login', (req, res) => {
 
 // allows users to setup a username 
 app.post('/urls/logout', (req, res) => {
-  res.clearCookie('username'); 
+  res.clearCookie('user_id'); 
   res.redirect(`/urls/`);
 }); 
 
