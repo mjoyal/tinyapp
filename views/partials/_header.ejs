@@ -15,9 +15,10 @@
       <form action="/urls/logout" method="POST">
         <button type="submit" class="btn btn-outline-dark">Logout</button>
       </form>
-    <%}else {%><form action="/urls/login" method="POST">
-      <input type="text" name="username" placeholder="Enter username" style="width: 200px; margin: 1em">
-      <button type="submit" class="btn btn-primary">Submit</button> 
-    </form><%}%> 
+    <%}else {%>    <a href="/login" class="btn btn-light">Login</a>
+    <a href="/register" class="btn btn-dark">Register</a>
+   <%}%>  
+
+
   </nav>
 </header>

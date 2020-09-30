@@ -32,7 +32,7 @@ const checkEmail = function (emailToCheck) {
   }
   for(const user in users) {
     if(users[user].email === emailToCheck) { 
-      return true; 
+      return user; 
     }
   }
     return false; 
@@ -84,10 +84,20 @@ app.post("/register", (req, res) => {
   res.redirect(`/urls/`);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = {user: users[req.cookies['user_id']]};
+  res.render('./urls_login', templateVars); 
+});
+
 // allows users to logout (clears username cookie)
-app.post('/urls/login', (req, res) => {
-  const username = res.cookie('username', req.body.username); 
-  res.redirect(`/urls/`);
+app.post('/login', (req, res) => {
+  const email = req.body.email; 
+  if(checkEmail(email)) {
+    res.cookie('user_id', checkEmail(email)); 
+    res.redirect(`/urls/`);
+  } else {
+    
+  }
 }); 
 
 // allows users to setup a username 
