@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; 
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser'); 
+const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs"); 
 app.use(cookieParser());
@@ -16,7 +17,7 @@ const users = {
   'DZtoes': {
     id: 'DZtoes',
     email: 'mackenzie.joyal@gmail.com',
-    password: 'SOS',
+    password: bcrypt.hashSync('SOS', 10),
   },
 };
 
@@ -41,17 +42,16 @@ const checkEmail = function (emailToCheck) {
     return false; 
 }
 
-const checkPassword = function (userid, passwordInput) {
-  if(users[userid].password === passwordInput) {
-    return true; 
-  }
-  return false; 
-}; 
+// const checkPassword = function (userid, passwordInput) {
+//   if(users[userid].password === passwordInput) {
+//     return true; 
+//   }
+//   return false; 
+// }; 
 
 const urlsForUser = (currentUserID, database) =>  {
   const userURLs = {}; 
   for(const url in database) {
-    console.log('userID:', database[url].userID );
     if(database[url].userID === currentUserID) {
       userURLs[url] = database[url].longURL; 
     }
@@ -102,7 +102,7 @@ app.post("/register", (req, res) => {
   const newUser = {
     id, 
     email: req.body.email, 
-    password: req.body.password,
+    password: bcrypt.hashSync(req.body.password, 10),
   }
   res.cookie('user_id', id);
   users[id] = newUser; 
@@ -118,10 +118,12 @@ app.get("/login", (req, res) => {
 // authenticates user 
 app.post('/login', (req, res) => {
   const email = req.body.email; 
-  const password = req.body.password; 
-  const user = checkEmail(email); 
-  if(user) {
-    if(checkPassword(user, password)) {
+  const givenPassword = req.body.password; 
+  const userID = checkEmail(email); 
+  const hashedPassword = users[userID].password; 
+  const passwordValidated = bcrypt.compareSync(givenPassword, hashedPassword);
+  if(userID) {
+    if(passwordValidated) {
       res.cookie('user_id', checkEmail(email)); 
       res.redirect(`/urls/`);
     } else {
