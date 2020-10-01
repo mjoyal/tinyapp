@@ -1,9 +1,15 @@
+// outside requirements
 const express = require('express'); 
 const app = express(); 
 const PORT = 8080; 
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session'); 
 const bcrypt = require('bcrypt');
+
+// helper functions 
+const {getUserByEmail, generateRandomString, urlsForUser} = require('./helpers'); 
+
+// setup
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs"); 
 app.use(cookieSession({
@@ -24,49 +30,6 @@ const users = {
     password: bcrypt.hashSync('SOS', 10),
   },
 };
-
-const generateRandomString = function () {
-  let random = ''; 
-  const options = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; 
-  for(let i = 0; i < 6; i++) {
-    random += options.charAt(Math.floor(Math.random() * options.length)); 
-  }
-  return random; 
-}; 
-
-const checkEmail = function (emailToCheck) {
-  if (Object.keys(users).length === 0){
-    return false; 
-  }
-  for(const user in users) {
-    if(users[user].email === emailToCheck) { 
-      return user; 
-    }
-  }
-    return false; 
-}
-
-// const checkPassword = function (userid, passwordInput) {
-//   if(users[userid].password === passwordInput) {
-//     return true; 
-//   }
-//   return false; 
-// }; 
-
-const urlsForUser = (currentUserID, database) =>  {
-  const userURLs = {}; 
-  for(const url in database) {
-    if(database[url].userID === currentUserID) {
-      userURLs[url] = database[url].longURL; 
-    }
-  }
-  return userURLs;
-}; 
-
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
 
 //render urls_new.ejs - show a POST form with one input (for the long URL) and button
 app.get("/urls/new", (req, res) => {
@@ -98,7 +61,7 @@ app.post("/register", (req, res) => {
   if(req.body.email === '' || req.body.password === '') {
     res.status('400').json({message: 'Please enter valid email or password'});
     return; 
-  }  else if (checkEmail(req.body.email)) {
+  }  else if (getUserByEmail(req.body.email, users)) {
     res.status('400').json({message: 'Email already exists'});; 
     return; 
   }
@@ -122,7 +85,7 @@ app.get("/login", (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email; 
   const givenPassword = req.body.password; 
-  const userID = checkEmail(email); 
+  const userID = getUserByEmail(email, users); 
   const hashedPassword = users[userID].password; 
   const passwordValidated = bcrypt.compareSync(givenPassword, hashedPassword);
   if(userID) {
@@ -195,7 +158,6 @@ app.post('/urls/:shortURL', (req, res) => {
   }
   
 });
-
 
 
 // asks the server to listen for requests
