@@ -9,13 +9,14 @@
 </head>
 <body>
   <%- include('partials/_header') %> 
-  <div class="card text-left">
-    <h2>Create Account</h2>
-    <form class="text-left" action="/register" method="POST">
+  <div class="text-left" style="margin: 3em; width: 10em;">
+    <h2 style="margin-bottom: 1em"> Register</h2>
+    <form class="text-left" action="/register" method="POST" style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 1em">
       <label for="email">Email</label>
       <input type="email" name="email">
       <label for="password">Password</label>
       <input type="password" name="password">
+      <div></div>
       <button type="submit" class="btn btn-primary">Sign Up</button>
     </form>
   </div>
